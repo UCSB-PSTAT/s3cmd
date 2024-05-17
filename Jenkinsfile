@@ -30,9 +30,9 @@ pipeline {
                 }
                 stage('Test') {
                     steps {
-                        sh 'podman run -it --rm --pull=never localhost/$IMAGE_NAME "which md5sum"'
-                        sh 'podman run -it --rm --pull=never localhost/$IMAGE_NAME "which s3cmd"'
-                        sh 'podman run -it --rm --pull=never localhost/$IMAGE_NAME "which zip"'
+                        sh 'podman run -it --rm --pull=never localhost/$IMAGE_NAME which md5sum'
+                        sh 'podman run -it --rm --pull=never localhost/$IMAGE_NAME which s3cmd'
+                        sh 'podman run -it --rm --pull=never localhost/$IMAGE_NAME which zip'
                     }
                     post {
                         unsuccessful {
