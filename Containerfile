@@ -1,11 +1,5 @@
-FROM ucsb/jupyter-base:latest
+FROM alpine:latest
 
 MAINTAINER LSIT Systems <lsitops@lsit.ucsb.edu>
 
-USER root
-
-#RUN mamba install -y astropy <libraries>
-
-#RUN pip install <libraries>
-
-USER $NB_USER
+RUN apk add s3cmd zip

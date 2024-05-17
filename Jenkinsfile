@@ -1,10 +1,10 @@
 pipeline {
     agent none
     triggers {
-        upstream(upstreamProjects: 'UCSB-PSTAT GitHub/jupyter-base/main', threshold: hudson.model.Result.SUCCESS)
+        cron('0 0 * * 1')
     }
     environment {
-        IMAGE_NAME = '<COURSE/IMAGE ID HERE>'
+        IMAGE_NAME = 's3cmd'
     }
     stages {
         stage('Build Test Deploy') {
@@ -30,15 +30,11 @@ pipeline {
                 }
                 stage('Test') {
                     steps {
-                        //sh 'podman run -it --rm --pull=never localhost/$IMAGE_NAME python -c "import <library>;"'
-                        sh 'podman run -d --name=$IMAGE_NAME --rm --pull=never -p 8888:8888 localhost/$IMAGE_NAME start-notebook.sh --NotebookApp.token="jenkinstest"'
-                        sh 'sleep 10 && curl -v http://localhost:8888/lab?token=jenkinstest 2>&1 | grep -P "HTTP\\S+\\s200\\s+[\\w\\s]+\\s*$"'
-                        sh 'curl -v http://localhost:8888/tree?token=jenkinstest 2>&1 | grep -P "HTTP\\S+\\s200\\s+[\\w\\s]+\\s*$"'
+                        sh 'podman run -it --rm --pull=never localhost/$IMAGE_NAME "which md5sum"'
+                        sh 'podman run -it --rm --pull=never localhost/$IMAGE_NAME "which s3cmd"'
+                        sh 'podman run -it --rm --pull=never localhost/$IMAGE_NAME "which zip"'
                     }
                     post {
-                        always {
-                            sh 'podman rm -ifv $IMAGE_NAME'
-                        }
                         unsuccessful {
                             sh 'podman rmi -i localhost/$IMAGE_NAME || true'
                         }
@@ -51,7 +47,6 @@ pipeline {
                     }
                     steps {
                         sh 'skopeo copy containers-storage:localhost/$IMAGE_NAME docker://docker.io/ucsb/$IMAGE_NAME:latest --dest-username $DOCKER_HUB_CREDS_USR --dest-password $DOCKER_HUB_CREDS_PSW'
-                        sh 'skopeo copy containers-storage:localhost/$IMAGE_NAME docker://docker.io/ucsb/$IMAGE_NAME:v$(date "+%Y%m%d") --dest-username $DOCKER_HUB_CREDS_USR --dest-password $DOCKER_HUB_CREDS_PSW'
                     }
                     post {
                         always {
